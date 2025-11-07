@@ -2,11 +2,11 @@ import axios from 'axios'
 
 const AUTH_STORAGE_KEY = 'gymie_auth_v1'
 
-const apiClient = axios.create({
+const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
 })
 
-apiClient.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     try {
       const stored = localStorage.getItem(AUTH_STORAGE_KEY)
@@ -25,4 +25,5 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-export { apiClient }
+export default api
+export { api }

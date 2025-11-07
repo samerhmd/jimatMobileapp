@@ -1,4 +1,4 @@
-import { apiClient } from './client'
+import api from './client'
 import { z } from 'zod'
 
 const LoginResponseSchema = z.object({
@@ -13,7 +13,7 @@ const LoginResponseSchema = z.object({
 export type LoginResponse = z.infer<typeof LoginResponseSchema>
 
 export async function loginApi(email: string, password: string): Promise<LoginResponse> {
-  const response = await apiClient.post('/api/token', { email, password })
+  const response = await api.post('/api/token', { email, password })
   const parsed = LoginResponseSchema.parse(response.data)
   return parsed
 }

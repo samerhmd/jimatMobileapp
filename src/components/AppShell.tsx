@@ -14,7 +14,7 @@ const activeClass =
 const baseClass =
   'relative px-2 py-1 text-sm font-medium text-slate-300 transition hover:text-emerald-300 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-emerald-400/60 after:transition-all after:duration-300'
 
-export function AppShell({ children }: PropsWithChildren) {
+function AppShell({ children }: PropsWithChildren) {
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -51,3 +51,6 @@ export function AppShell({ children }: PropsWithChildren) {
     </div>
   )
 }
+
+export default AppShell
+export { AppShell }

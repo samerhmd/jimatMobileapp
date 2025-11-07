@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { Protected } from './routes/Protected.tsx'
-import { AppShell } from './components/AppShell.tsx'
-import { ClassesPage } from './pages/ClassesPage.tsx'
+import AppShell from './components/AppShell.tsx'
+import ClassesPage from './pages/ClassesPage.tsx'
 import { MyClassesPage } from './pages/MyClassesPage.tsx'
 import { WODPage } from './pages/WODPage.tsx'
 import { InvoicesPage } from './pages/InvoicesPage.tsx'
@@ -22,14 +22,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/login" element={<LoginPage />} />
           <Route element={<Protected />}>
             <Route path="/" element={<Navigate to="/classes" replace />} />
-            <Route
-              path="/classes"
-              element={
-                <AppShell>
-                  <ClassesPage />
-                </AppShell>
-              }
-            />
+            <Route path="/classes" element={<ClassesPage />} />
             <Route
               path="/my-classes"
               element={
