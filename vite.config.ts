@@ -38,7 +38,37 @@ export default defineConfig(({ mode }) => {
               method: 'GET',
               options: {
                 cacheName: 'api-cache',
-                networkTimeoutSeconds: 10,
+                networkTimeoutSeconds: 5,
+                expiration: {
+                  maxEntries: 200,
+                  maxAgeSeconds: 86400,
+                },
+              },
+            },
+            {
+              urlPattern: ({ request }) =>
+                request.destination === 'image' &&
+                /\.(png|jpe?g|webp|svg)$/.test(new URL(request.url).pathname),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'img-cache',
+                expiration: {
+                  maxEntries: 200,
+                  maxAgeSeconds: 2592000,
+                },
+              },
+            },
+            {
+              urlPattern: ({ request }) =>
+                request.destination === 'font' &&
+                /\.(woff2?|ttf)$/.test(new URL(request.url).pathname),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'font-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 31536000,
+                },
               },
             },
           ],

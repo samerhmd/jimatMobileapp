@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { listClasses, bookClass } from '../api/classes'
 import AppShell from '../components/AppShell'
+import { toast } from '../lib/notify'
 
 function todayISO(){
   return new Date().toISOString().slice(0,10)
@@ -49,14 +50,14 @@ export default function ClassesPage(){
               <button
                 onClick={() => mBook.mutate(
                   { id: c.id, class_date: date },
-                  {
-                    onError: (err: any) => {
-                      const msg = err?.response?.status === 409
-                        ? (err?.response?.data?.message || 'Class full or already booked')
-                        : 'Booking failed'
-                      alert(msg)
+                    {
+                      onError: (err: any) => {
+                        const msg = err?.response?.status === 409
+                          ? (err?.response?.data?.message || 'Class full or already booked')
+                          : 'Booking failed'
+                        toast.error(msg)
+                      }
                     }
-                  }
                 )}
                 className="px-4 py-2 rounded-lg bg-sky-600 text-white disabled:opacity-60"
                 disabled={full || mBook.isPending}

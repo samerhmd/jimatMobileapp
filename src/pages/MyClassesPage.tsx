@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { myBookings, cancelBooking } from '../api/classes'
 import AppShell from '../components/AppShell'
+import { toast } from '../lib/notify'
 
 export default function MyClassesPage(){
   const qc = useQueryClient()
@@ -30,11 +31,11 @@ export default function MyClassesPage(){
               <div className="text-sm text-slate-600">Date: {b.class_date}</div>
               {b.status && <div className="text-xs text-slate-500">Status: {b.status}</div>}
             </div>
-            <button
-              onClick={() => mCancel.mutate(
-                { class_id: b.class_id, class_date: b.class_date },
-                { onError: () => alert('Cancel failed') }
-              )}
+              <button
+                onClick={() => mCancel.mutate(
+                  { class_id: b.class_id, class_date: b.class_date },
+                  { onError: () => toast.error('Cancel failed') }
+                )}
               className="px-4 py-2 rounded-lg bg-rose-600 text-white disabled:opacity-60"
               disabled={mCancel.isPending}
             >
