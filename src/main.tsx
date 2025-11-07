@@ -7,7 +7,7 @@ import { LoginPage } from './pages/LoginPage.tsx'
 import { Protected } from './routes/Protected.tsx'
 import AppShell from './components/AppShell.tsx'
 import ClassesPage from './pages/ClassesPage.tsx'
-import { MyClassesPage } from './pages/MyClassesPage.tsx'
+import MyClassesPage from './pages/MyClassesPage.tsx'
 import { WODPage } from './pages/WODPage.tsx'
 import { InvoicesPage } from './pages/InvoicesPage.tsx'
 import { ProfilePage } from './pages/ProfilePage.tsx'
@@ -23,14 +23,7 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<Protected />}>
             <Route path="/" element={<Navigate to="/classes" replace />} />
             <Route path="/classes" element={<ClassesPage />} />
-            <Route
-              path="/my-classes"
-              element={
-                <AppShell>
-                  <MyClassesPage />
-                </AppShell>
-              }
-            />
+            <Route path="/my-classes" element={<MyClassesPage />} />
             <Route
               path="/wod"
               element={
