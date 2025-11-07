@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# GYMie Member Web App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript application powered by Vite, Tailwind, React Query, and Capacitor. The app delivers the member-facing experience for GYMie, including classes, bookings, workout history, invoices, and account management.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. Install dependencies
+   ```bash
+   npm install
+   ```
+2. Configure environment variables (see below)
+3. Start the dev server
+   ```bash
+   npm run dev
+   ```
+4. Open `http://localhost:5173/` in your browser
 
-## React Compiler
+### Environment Variables
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The app relies on `VITE_API_BASE_URL` to talk to the Laravel API. Copy one of the provided templates or override per environment:
 
-## Expanding the ESLint configuration
+| File                | Purpose                              | Example value                    |
+| ------------------- | ------------------------------------ | -------------------------------- |
+| `.env.development`  | Local development defaults           | `VITE_API_BASE_URL=http://localhost:8000` |
+| `.env.production`   | Production build settings            | `VITE_API_BASE_URL=https://api.example.com` |
+| `.env`              | Optional local overrides (gitignored)| _set to your personal API URL_   |
+| `.env.example`      | Reference/template                   | `VITE_API_BASE_URL=https://api.example.com` |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Commands
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- `npm run dev` – start Vite dev server with hot reload
+- `npm run build` – type-check and build for production
+- `npm run build:prod` – same as above but injects `VITE_BUILD_TIME` (UTC) for health reporting
+- `npm run preview` – serve the production build locally
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Deployment
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Ensure `VITE_API_BASE_URL` is set for the target environment. Add the correct value via `.env.production` (static hosts) or provider-specific config (Vercel/Netlify/Cloudflare).
+2. Build the app:
+   ```bash
+   npm run build        # standard
+   npm run build:prod   # includes VITE_BUILD_TIME
+   ```
+3. Deploy the `dist/` folder to a static host:
+   - Vercel / Netlify / Cloudflare Pages – point to `npm run build` and publish `dist`
+   - Nginx / Apache – serve `dist` as static assets; enable SPA fallbacks to `index.html`
+   - **HTTPS is required** to enable the PWA service worker and install prompts.
+4. Laravel API checklist:
+   - Enable CORS for the deployed web origin(s)
+   - Serve API over HTTPS (Capacitor builds rely on secure origins)
+   - Implement appropriate rate limiting
+   - Provide JWT/session expiry and refresh handling compatible with the client
+
+### Health Check
+
+The `/health` route exposes a simple status page (no auth) with the build timestamp and current API base. Use it for uptime monitoring and environment validation.
+
+### Mobile Builds
+
+Capacitor projects for Android and iOS live under `android/` and `ios/`. After each web build, run `npx cap copy`. Use native IDEs for emulator/device builds:
+
+```bash
+npx cap open android
+npx cap open ios
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Refer to the Capacitor workflow guide for publishing steps.

@@ -1,0 +1,13 @@
+/* TEAM */
+Developer: GYMie Engineering
+Project: GYMie Member Web App
+Contact: engineering@gymie.example.com
+
+/* THANKS */
+Frameworks: React, Vite, Tailwind CSS, Capacitor
+API: Laravel (GYMie backend)
+
+/* SITE */
+Last-Updated: 2025-11-07
+Standards: HTML5, CSS3, ES2023
+Components: PWA, Service Worker, Responsive Layout

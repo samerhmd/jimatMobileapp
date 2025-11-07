@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:prod": "cross-env VITE_BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -33,6 +34,7 @@
     "eslint": "^9.36.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
+    "cross-env": "^7.0.3",
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",

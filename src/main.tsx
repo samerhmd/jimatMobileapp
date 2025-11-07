@@ -11,6 +11,7 @@ import MyClassesPage from './pages/MyClassesPage.tsx'
 import WODPage from './pages/WODPage.tsx'
 import InvoicesPage from './pages/InvoicesPage.tsx'
 import ProfilePage from './pages/ProfilePage.tsx'
+import HealthPage from './pages/HealthPage.tsx'
 
 const queryClient = new QueryClient()
 
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')!).render(
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/health" element={<HealthPage />} />
           <Route element={<Protected />}>
             <Route path="/" element={<Navigate to="/classes" replace />} />
             <Route path="/classes" element={<ClassesPage />} />
