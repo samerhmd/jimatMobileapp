@@ -19,7 +19,14 @@ export function LoginPage() {
 
     try {
       const result = await loginApi(email, password)
-      localStorage.setItem(AUTH_KEY, JSON.stringify(result))
+      const exp = Date.now() + ((result as any)?.expires_in ?? 900) * 1000
+      const payload = {
+        token: result.token,
+        refresh_token: (result as any)?.refresh_token,
+        user: result.user,
+        exp,
+      }
+      localStorage.setItem(AUTH_KEY, JSON.stringify(payload))
       navigate('/classes', { replace: true })
     } catch (err) {
       console.error('Login failed', err)

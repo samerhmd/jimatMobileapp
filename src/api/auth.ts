@@ -3,6 +3,8 @@ import { z } from 'zod'
 
 const LoginResponseSchema = z.object({
   token: z.string(),
+  refresh_token: z.string().optional().nullable(),
+  expires_in: z.number().optional(), // seconds
   user: z.object({
     id: z.number(),
     name: z.string(),

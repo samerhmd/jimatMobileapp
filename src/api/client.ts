@@ -1,48 +1,79 @@
 import axios from 'axios'
+import { getAuth, saveAuth, clearAuth } from '../auth/store'
+import { toast } from '../lib/notify'
 
 const rawBase = (import.meta.env.VITE_API_BASE_URL ?? '').trim()
-// Strip trailing slashes
-const cleaned = rawBase.replace(/\/+$/, '')
-// In production, force blank base so we always call absolute paths like /api/token
+const cleaned = rawBase.replace(/\/+$/,'')
 const baseURL = import.meta.env.PROD ? '' : cleaned || ''
 
 const api = axios.create({
-  baseURL: baseURL || undefined, // undefined = use request URL as-is
+  baseURL: baseURL || undefined,
 })
 
+let refreshing = false
+let pending: Array<(token: string|null)=>void> = []
+
+function subscribe(cb: (token:string|null)=>void){ pending.push(cb) }
+function publish(token: string|null){ pending.forEach(fn=>fn(token)); pending = [] }
+
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    try {
-      const stored = localStorage.getItem('gymie_auth_v1')
-      if (stored) {
-        const parsed = JSON.parse(stored) as { token?: string } | string
-        const token = typeof parsed === 'string' ? parsed : parsed?.token
-        if (token) config.headers.Authorization = `Bearer ${token}`
-      }
-    } catch {}
+  const auth = typeof window !== 'undefined' ? getAuth() : null
+  if (auth?.token) {
+    const headers = (config.headers ?? {}) as Record<string, unknown>
+    headers.Authorization = `Bearer ${auth.token}`
+    config.headers = headers
   }
   return config
 })
 
-import { toast } from '../lib/notify'
-
-let redirecting = false;
-
 api.interceptors.response.use(
-  (res) => res,
-  (err) => {
+  (res)=>res,
+  async (err) => {
     const status = err?.response?.status
-    if (status === 401 && !redirecting) {
-      try { localStorage.removeItem('gymie_auth_v1') } catch {}
-      redirecting = true
-      // small delay avoids race conditions during React renders
-      setTimeout(() => {
-        redirecting = false
-        if (typeof window !== 'undefined' && location.pathname !== '/login') {
-          window.location.assign('/login')
+    const original = err?.config
+    if (status === 401 && !original?._retry) {
+      original._retry = true
+
+      const doRefresh = async () => {
+        try {
+          const auth = getAuth()
+          if (!auth?.refresh_token) throw new Error('no refresh token')
+          const { data } = await api.post('/api/token/refresh', { refresh_token: auth.refresh_token })
+          const next = {
+            ...auth,
+            token: data?.token,
+            exp: Date.now() + ((data?.expires_in ?? 900) * 1000),
+          }
+          saveAuth(next)
+          publish(next.token ?? null)
+          return next.token
+        } catch (e) {
+          publish(null)
+          throw e
+        } finally {
+          refreshing = false
         }
-      }, 100)
-    } else if (!err.response) {
+      }
+
+      if (!refreshing) {
+        refreshing = true
+        doRefresh().catch(() => {
+          clearAuth()
+          if (typeof window !== 'undefined' && location.pathname !== '/login') {
+            setTimeout(()=>window.location.assign('/login'), 50)
+          }
+        })
+      }
+
+      const token = await new Promise<string|null>((resolve) => subscribe(resolve))
+      if (token) {
+        original.headers = original.headers ?? {}
+        original.headers.Authorization = `Bearer ${token}`
+        return api.request(original)
+      }
+    }
+
+    if (!err.response) {
       toast.error('Network error. Check your connection.')
     } else if (status >= 500) {
       toast.error('Server error. Please try again.')
