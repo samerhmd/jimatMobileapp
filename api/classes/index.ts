@@ -1,5 +1,9 @@
 import { memory } from '../_store'
-export default function handler(_req: any, res: any) {
-  // Return current classes snapshot (bookings field may change as people book/cancel)
-  res.json(memory.classes);
+export default function handler(_req:any, res:any){
+  try {
+    res.json(memory.classes);
+  } catch (e:any) {
+    console.error('classes error', e);
+    res.status(500).json({ message:'server error' });
+  }
 }
