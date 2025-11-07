@@ -1,7 +1,6 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 let count: Record<number, number> = {101:4,102:10,103:2};
 const cap: Record<number, number> = {101:12,102:10,103:8};
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default function handler(req: any, res: any) {
   const id = Number(req.query.id);
   if (req.method === 'POST') {
     if (!(id in cap)) return res.status(404).json({ message: 'Class not found' });

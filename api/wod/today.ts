@@ -1,5 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-export default function handler(_req: VercelRequest, res: VercelResponse) {
+export default function handler(_req: any, res: any) {
   res.json({
     id:1, date:new Date().toISOString().slice(0,10),
     title:'EMOM 12',
