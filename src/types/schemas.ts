@@ -18,3 +18,19 @@ export const Booking = z.object({
 
 export type TClassItem = z.infer<typeof ClassItem>
 export type TBooking = z.infer<typeof Booking>
+
+export const WODItem = z.object({
+  id: z.number().optional(),
+  date: z.string(),                 // YYYY-MM-DD
+  title: z.string(),
+  description: z.string().nullish(),
+  movements: z.array(
+    z.object({
+      name: z.string(),
+      reps: z.string(),
+      weight: z.string().nullish(),
+    })
+  ).optional().default([]),
+  coach_notes: z.string().nullish(),
+})
+export type TWODItem = z.infer<typeof WODItem>
