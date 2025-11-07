@@ -1,27 +1,26 @@
 import axios from 'axios'
 
-const AUTH_STORAGE_KEY = 'gymie_auth_v1'
+const rawBase = (import.meta.env.VITE_API_BASE_URL ?? '').trim()
+// Strip trailing slashes
+const cleaned = rawBase.replace(/\/+$/, '')
+// In production, force blank base so we always call absolute paths like /api/token
+const baseURL = import.meta.env.PROD ? '' : cleaned || ''
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: baseURL || undefined, // undefined = use request URL as-is
 })
 
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY)
+      const stored = localStorage.getItem('gymie_auth_v1')
       if (stored) {
         const parsed = JSON.parse(stored) as { token?: string } | string
         const token = typeof parsed === 'string' ? parsed : parsed?.token
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
-        }
+        if (token) config.headers.Authorization = `Bearer ${token}`
       }
-    } catch {
-      // ignore malformed storage
-    }
+    } catch {}
   }
-
   return config
 })
 
@@ -53,4 +52,3 @@ api.interceptors.response.use(
 )
 
 export default api
-export { api }
