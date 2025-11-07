@@ -1,8 +1,17 @@
-const EMAIL_KEY = 'gymie_user_email'
-
 export function ProfilePage() {
-  const email =
-    typeof window !== 'undefined' ? localStorage.getItem(EMAIL_KEY) ?? 'Unknown member' : ''
+  let email = 'Unknown member'
+
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem('gymie_auth_v1')
+      if (stored) {
+        const parsed = JSON.parse(stored) as { user?: { email?: string } }
+        email = parsed?.user?.email ?? email
+      }
+    } catch {
+      // ignore malformed storage
+    }
+  }
 
   return (
     <section className="space-y-6">

@@ -1,24 +1,30 @@
 import { FormEvent, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { loginApi } from '../api/auth'
 
 const AUTH_KEY = 'gymie_auth_v1'
-const EMAIL_KEY = 'gymie_user_email'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    setError(null)
     setIsSubmitting(true)
 
-    setTimeout(() => {
-      localStorage.setItem(AUTH_KEY, 'fake-token')
-      localStorage.setItem(EMAIL_KEY, email)
+    try {
+      const result = await loginApi(email, password)
+      localStorage.setItem(AUTH_KEY, JSON.stringify(result))
       navigate('/classes', { replace: true })
-    }, 400)
+    } catch (err) {
+      console.error('Login failed', err)
+      setError('Invalid credentials. Please try again.')
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -76,6 +82,7 @@ export function LoginPage() {
                   className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring focus:ring-emerald-400/40"
                 />
               </div>
+              {error ? <p className="text-sm text-rose-400">{error}</p> : null}
               <button
                 type="submit"
                 disabled={isSubmitting}

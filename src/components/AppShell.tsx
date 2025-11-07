@@ -19,7 +19,6 @@ export function AppShell({ children }: PropsWithChildren) {
 
   const handleLogout = () => {
     localStorage.removeItem('gymie_auth_v1')
-    localStorage.removeItem('gymie_user_email')
     navigate('/login', { replace: true })
   }
 
