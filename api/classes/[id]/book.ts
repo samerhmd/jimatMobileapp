@@ -1,18 +1,56 @@
-let count: Record<number, number> = {101:4,102:10,103:2};
-const cap: Record<number, number> = {101:12,102:10,103:8};
-export default function handler(req: any, res: any) {
+import { memory, getToken, todayISO, isSameDate } from '../../_store'
+
+function findClass(id:number){
+  return memory.classes.find(c=>c.id===id) || null;
+}
+
+export default function handler(req:any, res:any){
   const id = Number(req.query.id);
+  const cls = findClass(id);
+  if (!cls) return res.status(404).json({ message: 'Class not found' });
+
+  const token = getToken(req);
+  if (!token) return res.status(401).json({ message: 'Missing bearer token' });
+
+  // get or init user bucket
+  const mine = (memory.byToken[token] = memory.byToken[token] || []);
+
   if (req.method === 'POST') {
-    if (!(id in cap)) return res.status(404).json({ message: 'Class not found' });
-    const used = count[id] ?? 0;
-    if (used >= cap[id]) return res.status(409).json({ message: 'Class full or already booked' });
-    count[id] = used + 1;
-    const class_date = (req.body as any)?.class_date || new Date().toISOString().slice(0,10);
-    return res.json({ class_id: id, class_date, status: 'booked' });
+    const class_date = (req.body as any)?.class_date || todayISO();
+
+    // DUPLICATE: already booked same class/date
+    const dup = mine.find(b => b.class_id===id && isSameDate(b.class_date, class_date));
+    if (dup) return res.status(409).json({ message: 'Already booked' });
+
+    // CAPACITY
+    const used = cls.bookings ?? 0;
+    if (used >= cls.capacity) return res.status(409).json({ message: 'Class full' });
+
+    // ok: add booking
+    cls.bookings = used + 1;
+    mine.push({ class_id:id, class_date });
+    return res.json({ class_id:id, class_date, status:'booked' });
   }
+
   if (req.method === 'DELETE') {
-    const class_date = String(req.query.date || new Date().toISOString().slice(0,10));
-    return res.json({ class_id: id, class_date, status: 'cancelled' });
+    const class_date = String(req.query?.date || todayISO());
+
+    // CANCEL CUTOFF: 2 hours before start_time (demo logic, local time)
+    const [hh, mm] = (cls.start_time || '00:00:00').split(':').map(Number);
+    const cutoff = new Date(class_date + 'T' + String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0') + ':00');
+    cutoff.setHours(cutoff.getHours() - 2);
+    const now = new Date();
+    if (now > cutoff) {
+      return res.status(409).json({ message: 'Cannot cancel within 2 hours of start' });
+    }
+
+    const idx = mine.findIndex(b => b.class_id===id && isSameDate(b.class_date, class_date));
+    if (idx === -1) return res.status(404).json({ message: 'No booking found for this class/date' });
+
+    mine.splice(idx,1);
+    cls.bookings = Math.max(0, (cls.bookings ?? 1) - 1);
+    return res.json({ class_id:id, class_date, status:'cancelled' });
   }
+
   return res.status(405).end();
 }

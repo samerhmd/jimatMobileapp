@@ -1,12 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { listClasses, bookClass } from '../api/classes'
+import { listClasses, bookClass, myBookings } from '../api/classes'
 import AppShell from '../components/AppShell'
 import { toast } from '../lib/notify'
-
-function todayISO(){
-  return new Date().toISOString().slice(0,10)
-}
+import { todayISO } from '../lib/time'
 
 export default function ClassesPage(){
   const qc = useQueryClient()
@@ -17,14 +14,22 @@ export default function ClassesPage(){
     queryKey: ['classes', { date, q }],
     queryFn: () => listClasses({ from: date, to: date, q }),
   })
+  const bookingsQ = useQuery({ queryKey: ['my-bookings'], queryFn: myBookings })
 
   const mBook = useMutation({
     mutationFn: ({ id, class_date }: { id:number; class_date:string }) => bookClass(id, class_date),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['classes'] })
       qc.invalidateQueries({ queryKey: ['my-bookings'] })
+      toast.success('Booked!')
     },
   })
+
+  useEffect(()=>{
+    if (typeof window !== 'undefined' && classesQ.data) {
+      (window as any).__gymie_classes__ = classesQ.data
+    }
+  }, [classesQ.data])
 
   return (
     <AppShell>
@@ -33,13 +38,20 @@ export default function ClassesPage(){
         <input placeholder="Search classes…" value={q} onChange={(e)=>setQ(e.target.value)} className="border rounded p-2 flex-1"/>
       </div>
 
-      {classesQ.isLoading && <p>Loading…</p>}
+      {classesQ.isLoading && (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-20 rounded-xl border bg-slate-100 animate-pulse" />
+          ))}
+        </div>
+      )}
       {classesQ.isError && <p className="text-rose-500 text-sm">Failed to load classes.</p>}
 
       <div className="grid gap-3">
         {classesQ.data?.map(c => {
           const used = c.bookings ?? 0
           const full = used >= c.capacity
+          const booked = bookingsQ.data?.some(b => b.class_id === c.id && b.class_date === date)
           return (
             <div key={c.id} className="bg-white rounded-xl border p-4 flex items-center justify-between">
               <div>
@@ -52,17 +64,20 @@ export default function ClassesPage(){
                   { id: c.id, class_date: date },
                     {
                       onError: (err: any) => {
-                        const msg = err?.response?.status === 409
-                          ? (err?.response?.data?.message || 'Class full or already booked')
+                      const status = err?.response?.status
+                      const msg = status === 409
+                        ? (err?.response?.data?.message || 'Class full or already booked')
+                        : status === 401
+                          ? 'Please log in again'
                           : 'Booking failed'
-                        toast.error(msg)
+                      toast.error(msg)
                       }
                     }
                 )}
                 className="px-4 py-2 rounded-lg bg-sky-600 text-white disabled:opacity-60"
-                disabled={full || mBook.isPending}
+                disabled={booked || full || mBook.isPending}
               >
-                {full ? 'Full' : (mBook.isPending ? 'Booking…' : 'Book')}
+                {booked ? 'Booked' : full ? 'Full' : (mBook.isPending ? 'Booking…' : 'Book')}
               </button>
             </div>
           )
