@@ -5,12 +5,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import { LoginPage } from './pages/LoginPage.tsx'
 import { Protected } from './routes/Protected.tsx'
-import AppShell from './components/AppShell.tsx'
 import ClassesPage from './pages/ClassesPage.tsx'
 import MyClassesPage from './pages/MyClassesPage.tsx'
-import { WODPage } from './pages/WODPage.tsx'
-import { InvoicesPage } from './pages/InvoicesPage.tsx'
-import { ProfilePage } from './pages/ProfilePage.tsx'
+import WODPage from './pages/WODPage.tsx'
+import InvoicesPage from './pages/InvoicesPage.tsx'
+import ProfilePage from './pages/ProfilePage.tsx'
 
 const queryClient = new QueryClient()
 
@@ -24,30 +23,9 @@ createRoot(document.getElementById('root')!).render(
             <Route path="/" element={<Navigate to="/classes" replace />} />
             <Route path="/classes" element={<ClassesPage />} />
             <Route path="/my-classes" element={<MyClassesPage />} />
-            <Route
-              path="/wod"
-              element={
-                <AppShell>
-                  <WODPage />
-                </AppShell>
-              }
-            />
-            <Route
-              path="/invoices"
-              element={
-                <AppShell>
-                  <InvoicesPage />
-                </AppShell>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <AppShell>
-                  <ProfilePage />
-                </AppShell>
-              }
-            />
+            <Route path="/wod" element={<WODPage />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
