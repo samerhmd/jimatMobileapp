@@ -1,8 +1,19 @@
+const { parseBody } = require('./_store');
+
 module.exports = function handler(req, res){
   try {
     if (req.method !== 'POST') return res.status(405).end();
-    const body = typeof req.body === 'string' ? JSON.parse(req.body||'{}') : (req.body||{});
+    const body = parseBody(req);
     const email = body.email || 'demo@gymie.app';
-    return res.json({ token:'dev-mock-token', user:{ id:1, name:'Demo User', email }});
-  } catch(e){ console.error('token',e); res.status(500).json({message:'server error'}); }
+    const token = 'dev-mock-token-' + Date.now();
+    return res.json({
+      token,
+      refresh_token: 'dev-mock-refresh',
+      expires_in: 900,
+      user: { id:1, name:'Demo User', email }
+    });
+  } catch(e){
+    console.error('token',e);
+    res.status(500).json({ error: 'internal' });
+  }
 }

@@ -6,7 +6,7 @@ function init() {
       { id:102, name:'HIIT',         start_time:'19:15:00', duration:45, capacity:10, bookings:10 },
       { id:103, name:'Mobility',     start_time:'20:15:00', duration:30, capacity:8,  bookings:2 },
     ],
-    byToken: {}, // token -> [{ class_id, class_date, status }]
+    byToken: {},
     invoices: [
       { id:5001, number:'INV-5001', amount:150, currency:'USD', status:'paid',   issued_at:'2025-10-01', due_at:'2025-10-01' },
       { id:5002, number:'INV-5002', amount:150, currency:'USD', status:'unpaid', issued_at:'2025-11-01', due_at:'2025-11-08' },
@@ -34,14 +34,18 @@ function getToken(req) {
       } catch {}
     }
     return 'public-demo-token';
-  } catch { return 'public-demo-token'; }
+  } catch {
+    return 'public-demo-token';
+  }
 }
 function todayISO(){ return new Date().toISOString().slice(0,10) }
 function isSameDate(a,b){ return a.slice(0,10) === b.slice(0,10) }
 function parseBody(req){
   const b = req?.body;
   if (!b) return {};
-  if (typeof b === 'string') { try { return JSON.parse(b) } catch { return {} } }
+  if (typeof b === 'string') {
+    try { return JSON.parse(b) } catch { return {} }
+  }
   return b;
 }
 
