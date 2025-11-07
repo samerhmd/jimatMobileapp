@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { PropsWithChildren } from 'react'
+import type { PropsWithChildren } from 'react'
 
 const navItems = [
   { to: '/classes', label: 'Classes' },
