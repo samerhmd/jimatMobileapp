@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Disallow the health endpoint from indexing if desired
+Disallow: /health
+
+Sitemap: https://www.example.com/sitemap.xml
