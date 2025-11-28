@@ -1,6 +1,6 @@
-const { parseBody } = require('./_store');
+import { parseBody } from './_store.js'
 
-module.exports = function handler(req, res){
+export default function handler(req, res){
   try {
     if (req.method !== 'POST') return res.status(405).end();
     const body = parseBody(req);
@@ -8,7 +8,7 @@ module.exports = function handler(req, res){
     const token = 'dev-mock-token-' + Date.now();
     return res.json({
       token,
-      refresh_token: 'dev-mock-refresh',
+      // refresh_token can be omitted in V0 simple strategy
       expires_in: 900,
       user: { id:1, name:'Demo User', email }
     });

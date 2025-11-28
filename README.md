@@ -1,6 +1,6 @@
-# GYMie Member Web App
+# V0 Member Mobile Web App for Gym Management System
 
-React + TypeScript application powered by Vite, Tailwind, React Query, and Capacitor. The app delivers the member-facing experience for GYMie, including classes, bookings, workout history, invoices, and account management.
+React + TypeScript application powered by Vite, Tailwind, React Query, and Capacitor. This V0 app delivers the member-facing experience: login, classes (book/cancel), WOD, invoices, and a health page.
 
 ## Getting Started
 
@@ -17,12 +17,12 @@ React + TypeScript application powered by Vite, Tailwind, React Query, and Capac
 
 ### Environment Variables
 
-The app relies on `VITE_API_BASE_URL` to talk to the Laravel API. Copy one of the provided templates or override per environment:
+The app relies on `VITE_API_BASE_URL` to talk to the API.
 
 | File                | Purpose                              | Example value                    |
 | ------------------- | ------------------------------------ | -------------------------------- |
 | `.env.development`  | Local development defaults           | `VITE_API_BASE_URL=http://localhost:8000` |
-| `.env.production`   | Production build settings            | `VITE_API_BASE_URL=https://api.example.com` |
+| `.env.production`   | Production build settings            | `VITE_API_BASE_URL=https://api.example.com` or leave empty for same-origin `/api` |
 | `.env`              | Optional local overrides (gitignored)| _set to your personal API URL_   |
 | `.env.example`      | Reference/template                   | `VITE_API_BASE_URL=https://api.example.com` |
 
@@ -54,6 +54,11 @@ The app relies on `VITE_API_BASE_URL` to talk to the Laravel API. Copy one of th
 ### Health Check
 
 The `/health` route exposes a simple status page (no auth) with the build timestamp and current API base. Use it for uptime monitoring and environment validation.
+
+### Docs
+- `docs/api-contracts.md` – expected API shapes
+- `docs/v0-qa-checklist.md` – manual test checklist
+- `docs/v0-changelog.md` – V0 hardening summary
 
 ### Mobile Builds
 

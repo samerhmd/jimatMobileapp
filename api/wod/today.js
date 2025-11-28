@@ -1,4 +1,4 @@
-module.exports = function handler(_req, res){
+export default function handler(_req, res){
   try {
     const d = new Date().toISOString().slice(0,10);
     res.json({

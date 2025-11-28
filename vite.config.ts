@@ -30,18 +30,10 @@ export default defineConfig(() => {
         workbox: {
           runtimeCaching: [
             {
-              // match same-origin /api/* calls
+              // V0: do not cache API calls to avoid stale data and complexity
               urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
-              handler: 'NetworkFirst',
+              handler: 'NetworkOnly',
               method: 'GET',
-              options: {
-                cacheName: 'api-cache',
-                networkTimeoutSeconds: 5,
-                expiration: {
-                  maxEntries: 200,
-                  maxAgeSeconds: 86400,
-                },
-              },
             },
             {
               urlPattern: ({ request }) =>

@@ -1,6 +1,6 @@
-const { memory, getToken, todayISO, isSameDate, parseBody } = require('../../_store');
+import { memory, getToken, todayISO, isSameDate, parseBody } from '../../_store.js'
 
-module.exports = function handler(req, res){
+export default function handler(req, res){
   try {
     const id = Number(req.query.id);
     const cls = memory.classes.find(c=>c.id===id);

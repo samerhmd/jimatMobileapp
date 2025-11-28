@@ -4,7 +4,6 @@ import type { PropsWithChildren } from 'react'
 
 const navItems = [
   { to: '/classes', label: 'Classes' },
-  { to: '/my-classes', label: 'My Classes' },
   { to: '/wod', label: 'WOD' },
   { to: '/invoices', label: 'Invoices' },
   { to: '/profile', label: 'Profile' },

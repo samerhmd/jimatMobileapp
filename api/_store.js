@@ -15,9 +15,9 @@ function init() {
 }
 const g = globalThis;
 if (!g.__GYMIE_MEM__) g.__GYMIE_MEM__ = init();
-const memory = g.__GYMIE_MEM__;
+export const memory = g.__GYMIE_MEM__;
 
-function getToken(req) {
+export function getToken(req) {
   try {
     const h = req?.headers || {};
     const auth = String(h.authorization || h.Authorization || '');
@@ -38,9 +38,9 @@ function getToken(req) {
     return 'public-demo-token';
   }
 }
-function todayISO(){ return new Date().toISOString().slice(0,10) }
-function isSameDate(a,b){ return a.slice(0,10) === b.slice(0,10) }
-function parseBody(req){
+export function todayISO(){ return new Date().toISOString().slice(0,10) }
+export function isSameDate(a,b){ return a.slice(0,10) === b.slice(0,10) }
+export function parseBody(req){
   const b = req?.body;
   if (!b) return {};
   if (typeof b === 'string') {
@@ -48,5 +48,3 @@ function parseBody(req){
   }
   return b;
 }
-
-module.exports = { memory, getToken, todayISO, isSameDate, parseBody };

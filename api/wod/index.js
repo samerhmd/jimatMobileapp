@@ -1,4 +1,4 @@
-module.exports = function handler(_req, res){
+export default function handler(_req, res){
   try {
     const today = new Date();
     const day = (d)=> new Date(today.getTime() - d*864e5).toISOString().slice(0,10);

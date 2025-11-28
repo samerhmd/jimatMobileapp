@@ -1,1 +1,0 @@
-# Jimat Mobile App

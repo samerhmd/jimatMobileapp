@@ -1,22 +1,16 @@
 import axios from 'axios'
-import { getAuth, saveAuth, clearAuth } from '../auth/store'
+import { getAuth, clearAuth } from '../auth/store'
 import { toast } from '../lib/notify'
 
+// Base URL selection
+// - Dev: use VITE_API_BASE_URL (e.g. http://localhost:4000)
+// - Prod: if VITE_API_BASE_URL is empty, assume same-origin (relative /api)
 const rawBase = (import.meta.env.VITE_API_BASE_URL ?? '').trim()
-const cleaned = rawBase.replace(/\/+$/, '')
-// Use explicit env base when provided (both dev and prod). Otherwise, fallback to same-origin in prod.
-const baseURL = cleaned !== '' ? cleaned : (import.meta.env.PROD ? '' : '')
+const baseURL = rawBase || (import.meta.env.PROD ? '' : '')
 
-const api = axios.create({
-  baseURL: baseURL || undefined,
-})
+const api = axios.create({ baseURL: baseURL || undefined })
 
-let refreshing = false
-let pending: Array<(token: string|null)=>void> = []
-
-function subscribe(cb: (token:string|null)=>void){ pending.push(cb) }
-function publish(token: string|null){ pending.forEach(fn=>fn(token)); pending = [] }
-
+// Attach Authorization header for authenticated requests
 api.interceptors.request.use((config) => {
   const auth = typeof window !== 'undefined' ? getAuth() : null
   if (auth?.token) {
@@ -27,51 +21,27 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// Error handling strategy
+// - 401: clear auth and redirect to login (no refresh in V0)
+// - Network unavailable: toast a friendly message
+// - Server 5xx: toast a generic message
+// - Canceled requests (ERR_CANCELED/ERR_ABORTED): ignore
 api.interceptors.response.use(
-  (res)=>res,
+  (res) => res,
   async (err) => {
     const status = err?.response?.status
-    const original = err?.config
-    if (status === 401 && !original?._retry) {
-      original._retry = true
+    const code = err?.code || ''
 
-      const doRefresh = async () => {
-        try {
-          const auth = getAuth()
-          if (!auth?.refresh_token) throw new Error('no refresh token')
-          const { data } = await api.post('/api/token/refresh', { refresh_token: auth.refresh_token })
-          const next = {
-            ...auth,
-            token: data?.token,
-            exp: Date.now() + ((data?.expires_in ?? 900) * 1000),
-          }
-          saveAuth(next)
-          publish(next.token ?? null)
-          return next.token
-        } catch (e) {
-          publish(null)
-          throw e
-        } finally {
-          refreshing = false
-        }
+    if (status === 401) {
+      clearAuth()
+      if (typeof window !== 'undefined' && location.pathname !== '/login') {
+        setTimeout(() => window.location.assign('/login'), 50)
       }
+      return Promise.reject(err)
+    }
 
-      if (!refreshing) {
-        refreshing = true
-        doRefresh().catch(() => {
-          clearAuth()
-          if (typeof window !== 'undefined' && location.pathname !== '/login') {
-            setTimeout(()=>window.location.assign('/login'), 50)
-          }
-        })
-      }
-
-      const token = await new Promise<string|null>((resolve) => subscribe(resolve))
-      if (token) {
-        original.headers = original.headers ?? {}
-        original.headers.Authorization = `Bearer ${token}`
-        return api.request(original)
-      }
+    if (code === 'ERR_CANCELED' || code === 'ERR_ABORTED') {
+      return Promise.reject(err)
     }
 
     if (!err.response) {
