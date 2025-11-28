@@ -76,7 +76,12 @@ export default function ClassesPage(){
                   <button
                     onClick={() => mCancel.mutate(
                       { class_id: c.id, class_date: date },
-                      { onError: (e:any) => toast.error(e?.response?.data?.message || 'Cancel failed') }
+                      {
+                        onError: (e: unknown) => {
+                          const resp = (e as { response?: { data?: { message?: string } } }).response
+                          toast.error(resp?.data?.message || 'Cancel failed')
+                        }
+                      }
                     )}
                     className="px-3 py-2 rounded-lg bg-rose-600 text-white disabled:opacity-60"
                     disabled={mCancel.isPending || withinCutoff}
@@ -90,10 +95,11 @@ export default function ClassesPage(){
                   onClick={() => mBook.mutate(
                     { id: c.id, class_date: date },
                     {
-                      onError: (err: any) => {
-                        const status = err?.response?.status
+                      onError: (err: unknown) => {
+                        const resp = (err as { response?: { status?: number; data?: { message?: string } } }).response
+                        const status = resp?.status
                         const msg = status === 409
-                          ? (err?.response?.data?.message || 'Class full or already booked')
+                          ? (resp?.data?.message || 'Class full or already booked')
                           : status === 401
                             ? 'Please log in again'
                             : 'Booking failed'

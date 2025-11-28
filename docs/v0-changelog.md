@@ -27,6 +27,5 @@
 
 ## Checks Run
 - Build: `npm run build` – PASS
-- Lint: `npm run lint` – PASS
+- Lint: `npm run lint` – PASS (configured ignores for `dist`, `dist-ssr`, `dev-dist`)
 - Tests: none present – N/A
-

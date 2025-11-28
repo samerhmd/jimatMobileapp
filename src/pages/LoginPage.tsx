@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { loginApi } from '../api/auth'
 import { saveAuth } from '../auth/store'
 
-const AUTH_KEY = 'gymie_auth_v1'
-
 export function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -20,14 +18,14 @@ export function LoginPage() {
 
     try {
       const result = await loginApi(email, password)
-      const exp = Date.now() + ((result as any)?.expires_in ?? 900) * 1000
+      const exp = Date.now() + (result.expires_in ?? 900) * 1000
       const payload = {
         token: result.token,
-        refresh_token: (result as any)?.refresh_token,
+        refresh_token: result.refresh_token,
         user: result.user,
         exp,
       }
-      saveAuth(payload as any)
+      saveAuth(payload)
       navigate('/classes', { replace: true })
     } catch (err) {
       console.error('Login failed', err)
